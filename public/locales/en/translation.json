@@ -2,6 +2,22 @@
     "welcome": "Welcome to the application",
     "language": "Language",
     "login": "Login",
-    "logout": "Logout"
+    "logout": "Logout",
+    "labels": {
+    "months": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ]
+  }
   }
   

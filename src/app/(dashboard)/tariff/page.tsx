@@ -118,7 +118,7 @@ function Tariff() {
   return (
     <div className="min-h-screen bg-gray-100 p-5">
       <div className="w-full mx-auto bg-white rounded-lg shadow-md">
-        <div className="flex items-center justify-between p-6 bg-[#0a2033] text-white rounded-t-lg">
+        <div className="flex items-center justify-between p-6  text-[#06113c] rounded-t-lg">
           <h2 className="text-2xl font-semibold">Tariff List</h2>
           <button
             onClick={() => {
@@ -135,7 +135,7 @@ function Tariff() {
               });
               setShowModal(true);
             }}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+            className="px-4 py-2 bg-[#06113c] text-white rounded-md hover:bg-[#141e46] focus:outline-none focus:ring focus:ring-blue-300"
           >
             Add New Tariff
           </button>

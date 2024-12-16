@@ -16,7 +16,7 @@ interface GoogleMapWithMarkersProps {
 const GoogleMapWithMarkers: React.FC<GoogleMapWithMarkersProps> = ({ markers }) => {
   const mapContainerStyle = {
     width: "100%",
-    height: "400px",
+    height: "390px",
   };
 
   // Coordonnées par défaut si aucun marqueur n'est présent
@@ -66,6 +66,7 @@ const GoogleMapWithMarkers: React.FC<GoogleMapWithMarkersProps> = ({ markers }) 
         onDragEnd={() => {
           console.log("Carte déplacée.");
         }}
+    
       >
         {isGoogleReady &&
           validMarkers.map((marker, index) => (

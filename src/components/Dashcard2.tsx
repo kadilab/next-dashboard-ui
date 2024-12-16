@@ -10,7 +10,7 @@ interface UserCardProps {
 const DashCard2 = ({ type, value ,bg}: UserCardProps) => {
   return (
     <div
-  className={`rounded-xl  shadow-2xl max-h-24 flex-1 flex  items-center w-full min-w-[130px]`}
+  className={`rounded-xl  shadow-2xl max-h-32 flex-1 flex  items-center w-full min-w-[130px]`}
   style={{ border: "1px solid #ccc" }}
 >
   <div className={` ${bg}  ps-4 pt-4 pb-4  text-white w-[100%] h-full rounded-xl shadow-md   flex-row   items-center`}>

@@ -8,19 +8,37 @@ const OrderTable = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userCache, setUserCache] = useState({});
+  const [userCache, setUserCache] = useState({}); // Stocker les noms des utilisateurs
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 10;
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchOrdersAndUsers = async () => {
       try {
-        const response = await fetch("http://localhost/api/api.php/records/orders");
-        if (!response.ok) {
+        setLoading(true);
+
+        // Récupérer les commandes
+        const ordersResponse = await fetch("http://localhost/api/api.php/records/orders");
+        if (!ordersResponse.ok) {
           throw new Error("Failed to fetch orders");
         }
-        const data = await response.json();
-        setOrders(data.records || []);
+        const ordersData = await ordersResponse.json();
+        setOrders(ordersData.records || []);
+
+        // Récupérer tous les utilisateurs
+        const usersResponse = await fetch("http://localhost/api/api.php/records/users");
+        if (!usersResponse.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        const usersData = await usersResponse.json();
+
+        // Construire un cache des noms d'utilisateurs
+        const userCache = {};
+        usersData.records.forEach((user) => {
+          userCache[user.id_user] = `${user.firstname} ${user.lastname}`;
+        });
+        setUserCache(userCache);
+
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -28,26 +46,31 @@ const OrderTable = () => {
       }
     };
 
-    fetchOrders();
+    fetchOrdersAndUsers();
   }, []);
 
-  const fetchUserName = async (userId) => {
-    if (!userId || userCache[userId]) {
-      return userCache[userId] || "N/A";
-    }
-
+  const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost/api/api.php/records/users/${userId}`);
+      const response = await fetch(`http://localhost/api/api.php/records/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
       if (!response.ok) {
-        throw new Error("Failed to fetch user");
+        throw new Error("Failed to update order status");
       }
-      const user = await response.json();
-      const userName = `${user.firstname} ${user.lastname}`;
-      setUserCache((prevCache) => ({ ...prevCache, [userId]: userName }));
-      return userName;
+
+      // Mettre à jour localement
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
     } catch (err) {
       console.error(err.message);
-      return "N/A";
     }
   };
 
@@ -76,9 +99,11 @@ const OrderTable = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-10">
-      <Loading/>
-    </div>;
+    return (
+      <div className="text-center py-10">
+        <Loading />
+      </div>
+    );
   }
 
   if (error) {
@@ -86,11 +111,11 @@ const OrderTable = () => {
   }
 
   return (
-    <div className="overflow-x-auto m-3 rounded-lg shadow-sm bg-white min-h-screen">
-      <div className="flex bg-[#0a2033] p-3 items-center justify-between pb-4">
-        <h2 className="text-2xl font-semibold text-white">Order List</h2>
+    <div className="overflow-x-auto m-3 rounded-2xl shadow-sm bg-white min-h-screen">
+      <div className="flex bg-[#ffffff] p-3 items-center justify-between pb-4">
+        <h2 className="text-2xl font-semibold text-blue-950">Booking History</h2>
 
-        {/* Search bar */}
+        {/* Barre de recherche */}
         <div className="pt-3">
           <input
             type="text"
@@ -115,6 +140,7 @@ const OrderTable = () => {
               <th className="px-6 py-3 text-left">Hours</th>
               <th className="px-6 py-3 text-left">Total Price</th>
               <th className="px-6 py-3 text-left">Status</th>
+              <th className="px-6 py-3 text-left">Payment Method</th>
               <th className="px-6 py-3 text-left">Action</th>
             </tr>
           </thead>
@@ -123,41 +149,13 @@ const OrderTable = () => {
               currentRecords.map((order, index) => (
                 <tr
                   key={order.id}
-                  className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
+                  className={`${
+                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                  } hover:bg-gray-100`}
                 >
                   <td className="px-6 py-3">{new Date(order.created_at).toLocaleString()}</td>
-                  <td className="px-6 py-3">
-                    {userCache[order.user_id] || (
-                      <span
-                        className="text-blue-500 cursor-pointer"
-                        onClick={async () => {
-                          const userName = await fetchUserName(order.user_id);
-                          setUserCache((prevCache) => ({
-                            ...prevCache,
-                            [order.user_id]: userName,
-                          }));
-                        }}
-                      >
-                        Fetching...
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-3">
-                    {userCache[order.driver] || (
-                      <span
-                        className="text-blue-500 cursor-pointer"
-                        onClick={async () => {
-                          const driverName = await fetchUserName(order.driver);
-                          setUserCache((prevCache) => ({
-                            ...prevCache,
-                            [order.driver]: driverName,
-                          }));
-                        }}
-                      >
-                        Fetching...
-                      </span>
-                    )}
-                  </td>
+                  <td className="px-6 py-3">{userCache[order.user_id] || "Unknown"}</td>
+                  <td className="px-6 py-3">{userCache[order.driver] || "Unknown"}</td>
                   <td className="px-6 py-3">{order.car_type}</td>
                   <td className="px-6 py-3">{order.service_type}</td>
                   <td className="px-6 py-3">{order.hours || "N/A"}</td>
@@ -167,20 +165,31 @@ const OrderTable = () => {
                       className={`px-3 py-1 rounded-full text-xs font-bold ${
                         order.status === "pending"
                           ? "bg-yellow-100 text-yellow-600"
-                          : "bg-green-100 text-green-600"
+                          : order.status === "confirmed"
+                          ? "bg-green-100 text-green-600"
+                          : "bg-red-100 text-red-600"
                       }`}
                     >
                       {order.status}
                     </span>
                   </td>
+                  <td className="px-6 py-3 text-xl font-semibold text-green-600">
+                    {order.paiement_method}
+                  </td>
                   <td>
-                    <button className="px-6 py-2 w-full bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300 disabled:bg-gray-300 disabled:cursor-not-allowed p-3">Cancel</button>
+                    <button
+                      onClick={() => updateOrderStatus(order.id, "cancelled")}
+                      disabled={order.status !== "pending"}
+                      className="px-6 py-2 w-full bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      Cancel
+                    </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="text-center py-3 text-gray-500">
+                <td colSpan="10" className="text-center py-3 text-gray-500">
                   No orders found.
                 </td>
               </tr>

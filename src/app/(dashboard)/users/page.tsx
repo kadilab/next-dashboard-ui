@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import bcrypt from "bcryptjs";
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -54,22 +55,36 @@ function UserManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = editingUser ? `${API_URL}/${editingUser.id_user}` : API_URL;
-
+  
     try {
+      let passwordHash = newUser.password_hash;
+  
+      // Si un nouveau mot de passe est fourni (ou lors de la création d'utilisateur)
+      if (!editingUser || newUser.password_hash) {
+        const saltRounds = 10; // Complexité du hachage
+        passwordHash = bcrypt.hashSync(newUser.password_hash, saltRounds);
+      }
+  
+      // Préparer les données utilisateur à envoyer
+      const userData = {
+        ...newUser,
+        password_hash: passwordHash,
+      };
+  
       const response = await fetch(url, {
         method: editingUser ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newUser),
+        body: JSON.stringify(userData),
       });
-
+  
       if (!response.ok) {
         const message = await response.text();
         throw new Error(`Failed to ${editingUser ? "update" : "add"} user: ${message}`);
       }
-
-      await fetchUsers(); // Reload the list after adding or editing
+  
+      await fetchUsers(); // Recharger la liste des utilisateurs après ajout ou modification
       setShowModal(false);
       setEditingUser(null);
       setNewUser({
@@ -88,7 +103,7 @@ function UserManagement() {
       setError(err.message);
     }
   };
-
+  
   const handleDelete = async (id) => {
     try {
       const response = await fetch(`${API_URL}/${id}`, {

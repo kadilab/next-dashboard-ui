@@ -1,7 +1,22 @@
 {
-    "welcome": "Bienvenue dans l'application",
-    "language": "Langue",
-    "login": "Se connecter",
-    "logout": "Se déconnecter"
+  "welcome": "Bienvenue dans l'application",
+  "language": "Langue",
+  "login": "Se connecter",
+  "logout": "Se déconnecter",
+  "labels": {
+    "months": [
+      "Janvier",
+      "Février",
+      "Mars",
+      "Avril",
+      "Mai",
+      "Juin",
+      "Juillet",
+      "Août",
+      "Septembre",
+      "Octobre",
+      "Novembre",
+      "Décembre"
+    ]
   }
-  
+}

@@ -34,6 +34,11 @@ const menuItems = [
         href: "/users",
       },
       {
+        icon: "/staff_60px.png",
+        label: "Wallet",
+        href: "/wallet",
+      },
+      {
         icon: "/exit_24px.png",
         label: "Logout",
         href: "/logout",
@@ -59,7 +64,7 @@ const Menu = () => {
                 href={item.href}
                 key={item.label}
                 className={`flex items-center justify-center lg:justify-start gap-4 text-white py-2 w-full p-2 ${
-                  isActive ? "bg-blue-600" : "hover:bg-gray-800"
+                  isActive ? "bg-[#1a3089]" : "hover:bg-[#192657]"
                 }`}
               >
                 <Image src={item.icon} alt="" width={20} height={40}></Image>

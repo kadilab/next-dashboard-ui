@@ -6,6 +6,7 @@ import Loading from "@/components/Loading";
 import { Bar, Line, Doughnut, Pie } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, PointElement, LineElement, ArcElement,LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import GoogleMapWithMarkers from "@/components/GoogleMaps";
+import { useTranslation } from "react-i18next";
 
 // Register necessary Chart.js components
 ChartJS.register(
@@ -34,7 +35,8 @@ const AdminPage = () => {
     canceled: Array(12).fill(0), // Initialisation des gains annulés
     pending: Array(12).fill(0), // Initialisation des gains en attente
   });
-  
+  const { t, i18n } = useTranslation();
+
   const [driversMarkers, setDriversMarkers] = useState([]);
 
 
@@ -142,7 +144,7 @@ const AdminPage = () => {
 
         if (order.status === "confirmed") {
           earningsByMonth.confirmed[monthIndex] += order.price;
-        } else if (order.status === "canceled") {
+        } else if (order.status === "cancelled") {
           earningsByMonth.canceled[monthIndex] += order.price;
         } else if (order.status === "pending") {
           earningsByMonth.pending[monthIndex] += order.price;
@@ -173,20 +175,7 @@ const AdminPage = () => {
 
   // Chart data configuration
   const chartData = {
-    labels: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ],
+    labels: t("labels.months", { returnObjects: true }),
     datasets: [
       {
         label: "Confirmed($)",
@@ -330,7 +319,7 @@ const AdminPage = () => {
           </div>
         </div>
 
-        <div className="p-4 lg:w-[20%] w-full flex flex-col items-end justify-center gap-4">
+        <div className="pt-4 lg:w-[20%] w-full flex flex-col items-end justify-between gap-2">
           <DashCard2 type="No. of Customer" bg="bg-pink-700" value={`${data.customer}`} />
           <DashCard2 type="No. of Driver" bg="bg-violet-700" value={`${data.driver}`} />
           <DashCard2 type="Active Driver" bg="bg-green-600" value={`${data.active}`} />
@@ -339,7 +328,7 @@ const AdminPage = () => {
 
       <div className="w-full p-3">
         <div className="me-3 card hidden lg:block lg:w-[100%] border bg-white mt-0 rounded-2xl shadow-md">
-          <h3 className="font-bold bg-white rounded-t-2xl text-center text-green-600 text-2xl p-4">Earnings Overview</h3>
+          <h3 className="font-bold bg-white rounded-t-2xl text-center text-black text-2xl p-4">Earnings Overview</h3>
           <div className="flex justify-between px-32  py-3" style={{ height: '300px', width: '100%' }}>
             <Line data={chartData} options={chartOptions} />
             <Doughnut data={chartData2} options={chartOptions2} />

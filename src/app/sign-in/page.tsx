@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import bcrypt from "bcryptjs";
+
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -29,7 +31,7 @@ const LoginPage = () => {
 
       // Find a user with matching email, password, and role
       const user = users.find(
-        (u) => u.email === email && u.password_hash === password && u.user_role === "admin"
+        (u) => u.email === email && bcrypt.compareSync(password, u.password_hash)&& u.user_role === "admin"
       );
 
       if (!user) {

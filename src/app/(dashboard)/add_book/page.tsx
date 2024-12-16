@@ -173,8 +173,8 @@ const OrderForm = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-5">
       <div className="w-full mx-auto bg-white rounded-lg shadow-md">
-        <div className="bg-[#0a2033] p-6 rounded-t-lg mb-6">
-          <h2 className="text-2xl font-semibold text-white">Réservez maintenant</h2>
+        <div className=" p-6 rounded-t-lg mb-6">
+          <h2 className="text-3xl font-bold text-[#06113c]">Réservez maintenant</h2>
         </div>
         <div className="p-6">
           {success && <div className="mb-4 text-green-600">{success}</div>}
@@ -285,7 +285,7 @@ const OrderForm = () => {
               <button
                 type="submit"
                 disabled={!order.car_type || !order.service_type || !id_user}
-                className="px-6 py-2 w-full bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-6 py-2 w-full bg-[#06113c] text-white rounded-md hover:bg-[#182454] focus:outline-none focus:ring focus:ring-blue-300 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Ajouter
               </button>
