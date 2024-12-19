@@ -173,7 +173,7 @@ const OrderTable = () => {
                       {order.status}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-xl font-semibold text-green-600">
+                  <td className="px-6 py-3 text-xl font-semibold text-blue-800">
                     {order.paiement_method}
                   </td>
                   <td>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 
 const Profile = () => {
-  const [user, setUser] = useState(null); // Stores user information
+  const [user, setUser] = useState(null); // Stocke les informations utilisateur
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
@@ -13,7 +13,7 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Fetch user data from localStorage (Simulate API fetching)
+  // Récupérer les données utilisateur depuis localStorage
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
@@ -25,13 +25,41 @@ const Profile = () => {
     }
   }, []);
 
-  const handleImageChange = (e) => {
+  // Gérer le changement d'image
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileImage(URL.createObjectURL(file)); // Preview the selected image
+      const validExtensions = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validExtensions.includes(file.type)) {
+        setError("Please select a valid image file (jpeg, png, jpg)");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("profileImage", file);
+
+      try {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorMsg = await response.text();
+          throw new Error(`Failed to upload image: ${errorMsg}`);
+        }
+
+        const { fileName } = await response.json();
+        setProfileImage(`/uploads/${fileName}`); // Mettre à jour l'aperçu avec le chemin de l'image
+        setError(null); // Réinitialiser les erreurs en cas de succès
+      } catch (err) {
+        console.error(err);
+        setError("Failed to upload image");
+      }
     }
   };
 
+  // Gérer la mise à jour du profil
   const handleUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -39,22 +67,26 @@ const Profile = () => {
     setError(null);
 
     try {
-      // Simulate an API call to update the user's profile
-      const response = await fetch(`http://localhost/api/api.php/records/users/${user.id_user}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstname,
-          lastname,
-          email,
-          password: password || user.password_hash, // Update password only if changed
-        }),
-      });
+      const response = await fetch(
+        `http://localhost/api/api.php/records/users/${user.id_user}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstname,
+            lastname,
+            email,
+            password: password || user.password_hash, // Ne met à jour le mot de passe que s'il a été modifié
+            profile_image: profileImage, // Enregistre uniquement le chemin de l'image
+          }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to update profile.");
+        const errorMsg = await response.text();
+        throw new Error(`Failed to update profile: ${errorMsg}`);
       }
 
       const updatedUser = {
@@ -65,9 +97,10 @@ const Profile = () => {
         profile_image: profileImage,
       };
 
-      localStorage.setItem("user", JSON.stringify(updatedUser)); // Update localStorage
+      localStorage.setItem("user", JSON.stringify(updatedUser)); // Mettre à jour localStorage
       setUser(updatedUser);
       setSuccess("Profile updated successfully.");
+      setError(null); // Réinitialiser les erreurs
     } catch (err) {
       setError(err.message);
     } finally {
@@ -78,14 +111,20 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-10 px-4">
       <div className="bg-white shadow-md rounded-lg w-full max-w-2xl p-6">
-        <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">My Profile</h2>
+        <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
+          My Profile
+        </h2>
 
-        {/* Display Success/Error Messages */}
-        {success && <p className="text-green-500 text-sm text-center mb-4">{success}</p>}
-        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+        {/* Messages de succès/erreur */}
+        {success && (
+          <p className="text-green-500 text-sm text-center mb-4">{success}</p>
+        )}
+        {error && (
+          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+        )}
 
         <form onSubmit={handleUpdate} className="space-y-6">
-          {/* Profile Picture */}
+          {/* Image de profil */}
           <div className="flex flex-col items-center">
             <img
               src={profileImage}
@@ -106,9 +145,12 @@ const Profile = () => {
             />
           </div>
 
-          {/* First Name */}
+          {/* Prénom */}
           <div>
-            <label htmlFor="firstname" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="firstname"
+              className="block text-sm font-medium text-gray-700"
+            >
               First Name
             </label>
             <input
@@ -122,9 +164,12 @@ const Profile = () => {
             />
           </div>
 
-          {/* Last Name */}
+          {/* Nom */}
           <div>
-            <label htmlFor="lastname" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="lastname"
+              className="block text-sm font-medium text-gray-700"
+            >
               Last Name
             </label>
             <input
@@ -140,7 +185,10 @@ const Profile = () => {
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -154,9 +202,12 @@ const Profile = () => {
             />
           </div>
 
-          {/* Password */}
+          {/* Mot de passe */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
             <input
@@ -170,7 +221,7 @@ const Profile = () => {
             />
           </div>
 
-          {/* Submit Button */}
+          {/* Bouton de soumission */}
           <div className="flex justify-end">
             <button
               type="submit"

@@ -34,7 +34,7 @@ const menuItems = [
         href: "/users",
       },
       {
-        icon: "/staff_60px.png",
+        icon: "/card_wallet_32px.png",
         label: "Wallet",
         href: "/wallet",
       },
